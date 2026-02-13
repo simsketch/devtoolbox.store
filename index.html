@@ -1,0 +1,1615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DevToolbox — Every Dev Tool You Need, One App</title>
+<meta name="description" content="36+ developer tools in one beautiful desktop app. JSON formatting, UUID generation, Base64 encoding, JWT decoding, and more. Free, offline, private.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=SF+Pro+Display:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════
+   CSS CUSTOM PROPERTIES
+   ═══════════════════════════════════════════ */
+:root {
+  --glass-bg: rgba(255, 255, 255, 0.06);
+  --glass-bg-hover: rgba(255, 255, 255, 0.1);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-border-hover: rgba(255, 255, 255, 0.18);
+  --glass-blur: 24px;
+  --glass-blur-heavy: 40px;
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  --glass-shadow-hover: 0 16px 48px rgba(0, 0, 0, 0.4);
+  --glass-inset: inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+  --bg-primary: #050510;
+  --bg-secondary: #0a0a1a;
+  --text-primary: #f0f0f8;
+  --text-secondary: rgba(240, 240, 248, 0.6);
+  --text-tertiary: rgba(240, 240, 248, 0.4);
+  --accent: #007AFF;
+  --accent-glow: rgba(0, 122, 255, 0.3);
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+
+  /* Tool category colors */
+  --color-format: #fab387;
+  --color-encode: #a6e3a1;
+  --color-crypto: #f38ba8;
+  --color-convert: #f9e2af;
+  --color-generate: #89dceb;
+  --color-text: #94e2d5;
+  --color-network: #74c7ec;
+  --color-misc: #cba6f7;
+}
+
+/* ═══════════════════════════════════════════
+   RESET & BASE
+   ═══════════════════════════════════════════ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  overflow-x: hidden;
+  line-height: 1.6;
+}
+
+/* ═══════════════════════════════════════════
+   ANIMATED MESH GRADIENT BACKGROUND
+   ═══════════════════════════════════════════ */
+.mesh-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.mesh-bg::before {
+  content: '';
+  position: absolute;
+  width: 150%;
+  height: 150%;
+  top: -25%;
+  left: -25%;
+  background:
+    radial-gradient(ellipse 600px 600px at 20% 20%, rgba(0, 122, 255, 0.15), transparent),
+    radial-gradient(ellipse 500px 500px at 80% 30%, rgba(138, 43, 226, 0.1), transparent),
+    radial-gradient(ellipse 700px 700px at 50% 70%, rgba(0, 200, 200, 0.08), transparent),
+    radial-gradient(ellipse 400px 400px at 70% 80%, rgba(255, 100, 150, 0.06), transparent);
+  animation: meshDrift 20s ease-in-out infinite alternate;
+}
+
+.mesh-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 800px 400px at 60% 50%, rgba(100, 180, 255, 0.06), transparent),
+    radial-gradient(ellipse 500px 500px at 30% 60%, rgba(180, 100, 255, 0.05), transparent);
+  animation: meshDrift2 25s ease-in-out infinite alternate;
+}
+
+@keyframes meshDrift {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  33% { transform: translate(2%, -1%) rotate(1deg); }
+  66% { transform: translate(-1%, 2%) rotate(-0.5deg); }
+  100% { transform: translate(1%, -2%) rotate(0.5deg); }
+}
+
+@keyframes meshDrift2 {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-3%, 2%) scale(1.05); }
+  100% { transform: translate(2%, -1%) scale(0.98); }
+}
+
+/* Prismatic light leak overlay */
+.light-leak {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(135deg,
+      rgba(255, 0, 100, 0.02) 0%,
+      rgba(255, 150, 0, 0.015) 15%,
+      rgba(255, 255, 0, 0.01) 30%,
+      transparent 50%,
+      rgba(0, 200, 255, 0.015) 70%,
+      rgba(100, 0, 255, 0.02) 85%,
+      rgba(255, 0, 150, 0.015) 100%
+    );
+  animation: leakShift 15s ease-in-out infinite alternate;
+}
+
+@keyframes leakShift {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.7; }
+}
+
+/* ═══════════════════════════════════════════
+   GLASS PANEL MIXIN
+   ═══════════════════════════════════════════ */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow), var(--glass-inset);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass:hover {
+  background: var(--glass-bg-hover);
+  border-color: var(--glass-border-hover);
+  box-shadow: var(--glass-shadow-hover), var(--glass-inset);
+}
+
+/* ═══════════════════════════════════════════
+   LAYOUT
+   ═══════════════════════════════════════════ */
+.page-content {
+  position: relative;
+  z-index: 2;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* ═══════════════════════════════════════════
+   NAVIGATION
+   ═══════════════════════════════════════════ */
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  padding: 16px 0;
+  transition: all 0.4s ease;
+}
+
+.nav.scrolled {
+  background: rgba(5, 5, 16, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: var(--text-primary);
+}
+
+.nav-logo {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--accent), #5856d6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  box-shadow: 0 2px 12px rgba(0, 122, 255, 0.3);
+}
+
+.nav-wordmark {
+  font-weight: 600;
+  font-size: 17px;
+  letter-spacing: -0.02em;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  list-style: none;
+}
+
+.nav-links a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 450;
+  transition: color 0.25s ease;
+}
+
+.nav-links a:hover { color: var(--text-primary); }
+
+.nav-cta {
+  padding: 8px 20px;
+  background: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 980px;
+  color: var(--text-primary) !important;
+  font-weight: 500 !important;
+  transition: all 0.25s ease !important;
+  cursor: pointer;
+}
+
+.nav-cta:hover {
+  background: rgba(255, 255, 255, 0.16) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* ═══════════════════════════════════════════
+   HERO SECTION
+   ═══════════════════════════════════════════ */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 120px 24px 80px;
+  position: relative;
+}
+
+/* Central glass orb behind hero */
+.hero-orb {
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0, 122, 255, 0.08) 0%, transparent 70%);
+  filter: blur(60px);
+  pointer-events: none;
+  animation: orbPulse 8s ease-in-out infinite;
+}
+
+@keyframes orbPulse {
+  0%, 100% { transform: scale(1); opacity: 0.6; }
+  50% { transform: scale(1.1); opacity: 0.9; }
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px 6px 8px;
+  border-radius: 980px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 32px;
+  animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
+}
+
+.hero-badge-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #34c759;
+  box-shadow: 0 0 8px rgba(52, 199, 89, 0.5);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.hero h1 {
+  font-size: clamp(52px, 8vw, 88px);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.05;
+  margin-bottom: 24px;
+  animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards;
+  opacity: 0;
+}
+
+.hero h1 .gradient-text {
+  background: linear-gradient(135deg, #fff 0%, rgba(255, 255, 255, 0.7) 50%, #64b5f6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-sub {
+  font-size: clamp(17px, 2.2vw, 21px);
+  font-weight: 400;
+  color: var(--text-secondary);
+  max-width: 600px;
+  line-height: 1.55;
+  margin-bottom: 48px;
+  animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards;
+  opacity: 0;
+}
+
+.hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards;
+  opacity: 0;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 32px;
+  border-radius: 980px;
+  background: #fff;
+  color: #000;
+  font-size: 17px;
+  font-weight: 600;
+  text-decoration: none;
+  letter-spacing: -0.01em;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 24px rgba(255, 255, 255, 0.15);
+}
+
+.btn-primary:hover {
+  transform: scale(1.04);
+  box-shadow: 0 8px 32px rgba(255, 255, 255, 0.25);
+}
+
+.btn-primary svg { transition: transform 0.25s ease; }
+.btn-primary:hover svg { transform: translateY(1px); }
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 28px;
+  border-radius: 980px;
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(12px);
+  color: var(--text-primary);
+  font-size: 17px;
+  font-weight: 500;
+  text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.16);
+  transform: scale(1.02);
+}
+
+.hero-meta {
+  margin-top: 24px;
+  font-size: 13px;
+  color: var(--text-tertiary);
+  animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.4s forwards;
+  opacity: 0;
+}
+
+.hero-meta span { margin: 0 8px; opacity: 0.3; }
+
+/* ═══════════════════════════════════════════
+   APP PREVIEW / WINDOW MOCK
+   ═══════════════════════════════════════════ */
+.app-preview {
+  margin-top: 80px;
+  width: 100%;
+  max-width: 960px;
+  animation: fadeInUp 1s cubic-bezier(0.16, 1, 0.3, 1) 0.5s forwards;
+  opacity: 0;
+}
+
+.app-window {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: rgba(15, 15, 30, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(var(--glass-blur-heavy));
+  -webkit-backdrop-filter: blur(var(--glass-blur-heavy));
+  box-shadow:
+    0 24px 80px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.app-titlebar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.titlebar-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.titlebar-dot:nth-child(1) { background: #ff5f57; }
+.titlebar-dot:nth-child(2) { background: #febc2e; }
+.titlebar-dot:nth-child(3) { background: #28c840; }
+
+.app-body {
+  display: flex;
+  min-height: 400px;
+}
+
+.app-sidebar {
+  width: 220px;
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 16px 12px;
+  flex-shrink: 0;
+}
+
+.sidebar-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  margin-bottom: 16px;
+  color: var(--text-tertiary);
+  font-size: 13px;
+}
+
+.sidebar-category {
+  margin-bottom: 4px;
+}
+
+.sidebar-category-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-tertiary);
+  padding: 8px 12px 4px;
+}
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: default;
+  transition: all 0.15s ease;
+}
+
+.sidebar-item.active {
+  background: rgba(0, 122, 255, 0.12);
+  color: var(--text-primary);
+}
+
+.sidebar-icon {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  flex-shrink: 0;
+}
+
+.app-main {
+  flex: 1;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.app-main-header {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.app-editor {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.editor-pane {
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 14px;
+  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  overflow: hidden;
+}
+
+.editor-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 10px;
+}
+
+.code-line { display: flex; gap: 16px; }
+.code-ln { color: rgba(255, 255, 255, 0.15); user-select: none; min-width: 16px; text-align: right; }
+.code-key { color: #89b4fa; }
+.code-str { color: #a6e3a1; }
+.code-num { color: #fab387; }
+.code-bool { color: #f38ba8; }
+.code-brace { color: rgba(255, 255, 255, 0.4); }
+.code-indent { padding-left: 16px; }
+
+/* ═══════════════════════════════════════════
+   TOOLS GRID SECTION
+   ═══════════════════════════════════════════ */
+.section {
+  padding: 120px 0;
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 64px;
+}
+
+.section-label {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+
+.section-title {
+  font-size: clamp(32px, 5vw, 48px);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  margin-bottom: 16px;
+}
+
+.section-desc {
+  font-size: 18px;
+  color: var(--text-secondary);
+  max-width: 560px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.tools-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.tool-card {
+  position: relative;
+  border-radius: var(--radius-md);
+  padding: 24px;
+  cursor: default;
+  overflow: hidden;
+}
+
+/* Specular highlight on glass cards */
+.tool-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
+}
+
+/* Prismatic refraction on hover */
+.tool-card::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(from 0deg,
+    transparent 0%,
+    rgba(255, 100, 100, 0.03) 10%,
+    transparent 20%,
+    rgba(100, 255, 100, 0.03) 30%,
+    transparent 40%,
+    rgba(100, 100, 255, 0.03) 50%,
+    transparent 60%,
+    rgba(255, 255, 100, 0.03) 70%,
+    transparent 80%,
+    rgba(255, 100, 255, 0.03) 90%,
+    transparent 100%
+  );
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+}
+
+.tool-card:hover::after { opacity: 1; }
+
+.tool-card:hover {
+  transform: translateY(-4px);
+}
+
+.tool-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  font-size: 18px;
+  position: relative;
+}
+
+.tool-icon::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: inherit;
+  filter: blur(12px);
+  opacity: 0.4;
+  z-index: -1;
+}
+
+.tool-name {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin-bottom: 6px;
+}
+
+.tool-desc {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.tool-tag {
+  display: inline-block;
+  margin-top: 12px;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: var(--text-tertiary);
+}
+
+/* Tool count pill */
+.tools-more {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 32px;
+}
+
+.tools-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 24px;
+  border-radius: 980px;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+/* ═══════════════════════════════════════════
+   FEATURES SECTION
+   ═══════════════════════════════════════════ */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.feature-card {
+  border-radius: var(--radius-md);
+  padding: 32px 28px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.feature-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+}
+
+.feature-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  font-size: 24px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.feature-name {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin-bottom: 8px;
+}
+
+.feature-desc {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.55;
+}
+
+/* ═══════════════════════════════════════════
+   PIPELINE / WORKFLOW SECTION
+   ═══════════════════════════════════════════ */
+.pipeline-section {
+  padding: 120px 0;
+}
+
+.pipeline-showcase {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: center;
+}
+
+.pipeline-visual {
+  border-radius: var(--radius-lg);
+  padding: 40px;
+  position: relative;
+  overflow: hidden;
+  min-height: 360px;
+}
+
+.pipeline-visual::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+}
+
+.pipeline-nodes {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.pipeline-node {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 14px;
+  font-weight: 500;
+  position: relative;
+}
+
+.pipeline-node::before {
+  content: '';
+  position: absolute;
+  left: 32px;
+  top: 100%;
+  width: 2px;
+  height: 24px;
+  background: linear-gradient(to bottom, rgba(0, 122, 255, 0.3), transparent);
+}
+
+.pipeline-node:last-child::before { display: none; }
+
+.pipeline-node-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.pipeline-node-arrow {
+  margin-left: auto;
+  color: var(--text-tertiary);
+  font-size: 12px;
+}
+
+.pipeline-content h3 {
+  font-size: clamp(28px, 3.5vw, 36px);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  margin-bottom: 16px;
+  line-height: 1.15;
+}
+
+.pipeline-content p {
+  font-size: 17px;
+  color: var(--text-secondary);
+  line-height: 1.65;
+  margin-bottom: 24px;
+}
+
+.pipeline-features {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pipeline-feature {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 15px;
+  color: var(--text-secondary);
+}
+
+.pipeline-feature-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex-shrink: 0;
+}
+
+/* ═══════════════════════════════════════════
+   CTA SECTION
+   ═══════════════════════════════════════════ */
+.cta-section {
+  padding: 80px 0 120px;
+}
+
+.cta-card {
+  border-radius: var(--radius-xl);
+  padding: 80px 48px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(var(--glass-blur-heavy));
+  -webkit-backdrop-filter: blur(var(--glass-blur-heavy));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.3);
+}
+
+.cta-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 10%, rgba(255, 255, 255, 0.15) 50%, transparent 90%);
+}
+
+/* Glow orb behind CTA */
+.cta-card::after {
+  content: '';
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0, 122, 255, 0.1) 0%, transparent 70%);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.cta-title {
+  font-size: clamp(32px, 5vw, 48px);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  margin-bottom: 16px;
+  position: relative;
+  z-index: 1;
+}
+
+.cta-desc {
+  font-size: 18px;
+  color: var(--text-secondary);
+  margin-bottom: 40px;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+  position: relative;
+  z-index: 1;
+  line-height: 1.6;
+}
+
+.cta-actions {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+
+/* ═══════════════════════════════════════════
+   FOOTER
+   ═══════════════════════════════════════════ */
+.footer {
+  padding: 48px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.footer-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.footer-left {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+.footer-logo {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, var(--accent), #5856d6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+}
+
+.footer-copy {
+  font-size: 13px;
+  color: var(--text-tertiary);
+}
+
+.footer-links {
+  display: flex;
+  gap: 24px;
+  list-style: none;
+}
+
+.footer-links a {
+  font-size: 13px;
+  color: var(--text-tertiary);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.footer-links a:hover { color: var(--text-secondary); }
+
+/* ═══════════════════════════════════════════
+   ANIMATIONS
+   ═══════════════════════════════════════════ */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Stagger children */
+.stagger > * {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.stagger.visible > *:nth-child(1) { transition-delay: 0s; }
+.stagger.visible > *:nth-child(2) { transition-delay: 0.05s; }
+.stagger.visible > *:nth-child(3) { transition-delay: 0.1s; }
+.stagger.visible > *:nth-child(4) { transition-delay: 0.15s; }
+.stagger.visible > *:nth-child(5) { transition-delay: 0.2s; }
+.stagger.visible > *:nth-child(6) { transition-delay: 0.25s; }
+.stagger.visible > *:nth-child(7) { transition-delay: 0.3s; }
+.stagger.visible > *:nth-child(8) { transition-delay: 0.35s; }
+.stagger.visible > *:nth-child(9) { transition-delay: 0.4s; }
+.stagger.visible > *:nth-child(10) { transition-delay: 0.45s; }
+.stagger.visible > *:nth-child(11) { transition-delay: 0.5s; }
+.stagger.visible > *:nth-child(12) { transition-delay: 0.55s; }
+.stagger.visible > *:nth-child(13) { transition-delay: 0.6s; }
+
+.stagger.visible > * {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════ */
+@media (max-width: 1024px) {
+  .tools-grid { grid-template-columns: repeat(3, 1fr); }
+  .features-grid { grid-template-columns: repeat(2, 1fr); }
+  .pipeline-showcase { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 768px) {
+  .tools-grid { grid-template-columns: repeat(2, 1fr); }
+  .features-grid { grid-template-columns: 1fr; }
+  .nav-links { display: none; }
+  .app-sidebar { display: none; }
+  .app-editor { grid-template-columns: 1fr; }
+  .hero { padding: 100px 20px 60px; }
+  .hero-actions { flex-direction: column; width: 100%; }
+  .btn-primary, .btn-secondary { width: 100%; justify-content: center; }
+  .footer-inner { flex-direction: column; gap: 24px; text-align: center; }
+  .footer-left { flex-direction: column; }
+  .cta-card { padding: 48px 24px; }
+  .cta-actions { flex-direction: column; align-items: center; }
+}
+
+@media (max-width: 480px) {
+  .tools-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- Animated mesh gradient background -->
+<div class="mesh-bg"></div>
+<div class="light-leak"></div>
+
+<div class="page-content">
+
+  <!-- ═══════════════ NAVIGATION ═══════════════ -->
+  <nav class="nav" id="nav">
+    <div class="nav-inner">
+      <a href="#" class="nav-brand">
+        <div class="nav-logo">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="16 18 22 12 16 6"></polyline>
+            <polyline points="8 6 2 12 8 18"></polyline>
+          </svg>
+        </div>
+        <span class="nav-wordmark">DevToolbox</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="#tools">Tools</a></li>
+        <li><a href="#features">Features</a></li>
+        <li><a href="#pipeline">Pipeline</a></li>
+        <li><a href="#download" class="nav-cta">Download</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- ═══════════════ HERO ═══════════════ -->
+  <section class="hero" id="hero">
+    <div class="hero-orb"></div>
+
+    <div class="hero-badge">
+      <span class="hero-badge-dot"></span>
+      Free &amp; Open Source
+    </div>
+
+    <h1><span class="gradient-text">Every dev tool.<br>One app.</span></h1>
+
+    <p class="hero-sub">
+      36+ essential developer tools — JSON formatting, UUID generation, JWT decoding, and more — all running locally on your machine. Fast, private, offline.
+    </p>
+
+    <div class="hero-actions">
+      <a href="#download" class="btn-primary">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+        Download Free
+      </a>
+      <a href="https://github.com" class="btn-secondary" target="_blank" rel="noopener">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
+        </svg>
+        View Source
+      </a>
+    </div>
+
+    <p class="hero-meta">
+      macOS, Windows &amp; Linux <span>·</span> Built with Tauri <span>·</span> v0.1.0
+    </p>
+
+    <!-- App Window Preview -->
+    <div class="app-preview">
+      <div class="app-window">
+        <div class="app-titlebar">
+          <span class="titlebar-dot"></span>
+          <span class="titlebar-dot"></span>
+          <span class="titlebar-dot"></span>
+        </div>
+        <div class="app-body">
+          <div class="app-sidebar">
+            <div class="sidebar-search">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+              Search tools...
+            </div>
+            <div class="sidebar-category">
+              <div class="sidebar-category-label">Formatting</div>
+              <div class="sidebar-item active">
+                <span class="sidebar-icon" style="background:rgba(250,179,135,0.15);color:var(--color-format)">{ }</span>
+                JSON Formatter
+              </div>
+              <div class="sidebar-item">
+                <span class="sidebar-icon" style="background:rgba(250,179,135,0.15);color:var(--color-format)">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+                </span>
+                SQL Formatter
+              </div>
+            </div>
+            <div class="sidebar-category">
+              <div class="sidebar-category-label">Encoding</div>
+              <div class="sidebar-item">
+                <span class="sidebar-icon" style="background:rgba(166,227,161,0.15);color:var(--color-encode)">B6</span>
+                Base64
+              </div>
+              <div class="sidebar-item">
+                <span class="sidebar-icon" style="background:rgba(166,227,161,0.15);color:var(--color-encode)">%</span>
+                URL Encode
+              </div>
+            </div>
+            <div class="sidebar-category">
+              <div class="sidebar-category-label">Crypto</div>
+              <div class="sidebar-item">
+                <span class="sidebar-icon" style="background:rgba(243,139,168,0.15);color:var(--color-crypto)">#</span>
+                Hash Gen
+              </div>
+              <div class="sidebar-item">
+                <span class="sidebar-icon" style="background:rgba(243,139,168,0.15);color:var(--color-crypto)">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </span>
+                JWT Decode
+              </div>
+            </div>
+          </div>
+          <div class="app-main">
+            <div class="app-main-header">JSON Formatter</div>
+            <div class="app-editor">
+              <div class="editor-pane">
+                <div class="editor-label">Input</div>
+                <div class="code-line"><span class="code-ln">1</span><span class="code-brace">{</span></div>
+                <div class="code-line"><span class="code-ln">2</span><span class="code-indent"><span class="code-key">"name"</span><span class="code-brace">:</span> <span class="code-str">"DevToolbox"</span><span class="code-brace">,</span></span></div>
+                <div class="code-line"><span class="code-ln">3</span><span class="code-indent"><span class="code-key">"version"</span><span class="code-brace">:</span> <span class="code-str">"0.1.0"</span><span class="code-brace">,</span></span></div>
+                <div class="code-line"><span class="code-ln">4</span><span class="code-indent"><span class="code-key">"tools"</span><span class="code-brace">:</span> <span class="code-num">36</span><span class="code-brace">,</span></span></div>
+                <div class="code-line"><span class="code-ln">5</span><span class="code-indent"><span class="code-key">"free"</span><span class="code-brace">:</span> <span class="code-bool">true</span></span></div>
+                <div class="code-line"><span class="code-ln">6</span><span class="code-brace">}</span></div>
+              </div>
+              <div class="editor-pane">
+                <div class="editor-label">Output — Formatted</div>
+                <div class="code-line"><span class="code-ln">1</span><span class="code-brace">{</span></div>
+                <div class="code-line"><span class="code-ln">2</span><span class="code-indent"><span class="code-key">"name"</span>:    <span class="code-str">"DevToolbox"</span>,</span></div>
+                <div class="code-line"><span class="code-ln">3</span><span class="code-indent"><span class="code-key">"version"</span>: <span class="code-str">"0.1.0"</span>,</span></div>
+                <div class="code-line"><span class="code-ln">4</span><span class="code-indent"><span class="code-key">"tools"</span>:   <span class="code-num">36</span>,</span></div>
+                <div class="code-line"><span class="code-ln">5</span><span class="code-indent"><span class="code-key">"free"</span>:    <span class="code-bool">true</span></span></div>
+                <div class="code-line"><span class="code-ln">6</span><span class="code-brace">}</span></div>
+                <div class="code-line" style="margin-top:8px;color:rgba(166,227,161,0.6)"><span class="code-ln"> </span>✓ Valid JSON · 6 lines</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ TOOLS SECTION ═══════════════ -->
+  <section class="section" id="tools">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-label">36+ Tools</span>
+        <h2 class="section-title">Everything you reach for,<br>already here.</h2>
+        <p class="section-desc">From quick conversions to deep inspections — every tool a developer needs, in one fast, native app.</p>
+      </div>
+
+      <div class="tools-grid stagger" id="tools-grid">
+
+        <div class="tool-card glass">
+          <div class="tool-icon" style="background:rgba(250,179,135,0.12);color:var(--color-format)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          </div>
+          <div class="tool-name">JSON Formatter</div>
+          <div class="tool-desc">Format, validate, and minify JSON with syntax highlighting</div>
+          <span class="tool-tag">Formatting</span>
+        </div>
+
+        <div class="tool-card glass">
+          <div class="tool-icon" style="background:rgba(137,220,235,0.12);color:var(--color-generate)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M12 12h.01"/><path d="M17 12h.01"/><path d="M7 12h.01"/></svg>
+          </div>
+          <div class="tool-name">UUID Generator</div>
+          <div class="tool-desc">Generate v4 UUIDs, bulk create, and validate formats</div>
+          <span class="tool-tag">Generator</span>
+        </div>
+
+        <div class="tool-card glass">
+          <div class="tool-icon" style="background:rgba(166,227,161,0.12);color:var(--color-encode)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v4"/><polyline points="14 2 14 8 20 8"/><path d="m3 12.5 5 5"/><path d="m8 12.5-5 5"/></svg>
+          </div>
+          <div class="tool-name">Base64 Encoder</div>
+          <div class="tool-desc">Encode and decode Base64 strings and files instantly</div>
+          <span class="tool-tag">Encoding</span>
+        </div>
+
+        <div class="tool-card glass">
+          <div class="tool-icon" style="background:rgba(243,139,168,0.12);color:var(--color-crypto)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <div class="tool-name">JWT Decoder</div>
+          <div class="tool-desc">Decode, inspect, and verify JSON Web Tokens</div>
+          <span class="tool-tag">Crypto</span>
+        </div>
+
+        <div class="tool-card glass">
+          <div class="tool-icon" style="background:rgba(243,139,168,0.12);color:var(--color-crypto)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <div class="tool-name">Hash Generator</div>
+          <div class="tool-desc">SHA-1, SHA-256, SHA-512, MD5, and HMAC generation</div>
+          <span class="tool-tag">Crypto</span>
+        </div>
+
+        <div class="tool-card glass">
+          <div class="tool-icon" style="background:rgba(148,226,213,0.12);color:var(--color-text)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+          </div>
+          <div class="tool-name">Regex Tester</div>
+          <div class="tool-desc">Test and debug regular expressions with live matching</div>
+          <span class="tool-tag">Text</span>
+        </div>
+
+        <div class="tool-card glass">
+          <div class="tool-icon" style="background:rgba(249,226,175,0.12);color:var(--color-convert)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="6.5" cy="13.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>
+          </div>
+          <div class="tool-name">Color Converter</div>
+          <div class="tool-desc">Convert between HEX, RGB, HSL, and preview colors live</div>
+          <span class="tool-tag">Converter</span>
+        </div>
+
+        <div class="tool-card glass">
+          <div class="tool-icon" style="background:rgba(148,226,213,0.12);color:var(--color-text)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <div class="tool-name">Timestamp Converter</div>
+          <div class="tool-desc">Unix epoch to human-readable and back with timezone support</div>
+          <span class="tool-tag">Date & Time</span>
+        </div>
+
+        <div class="tool-card glass">
+          <div class="tool-icon" style="background:rgba(166,227,161,0.12);color:var(--color-encode)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          </div>
+          <div class="tool-name">URL Encoder</div>
+          <div class="tool-desc">Encode, decode, and parse URL components and query strings</div>
+          <span class="tool-tag">Encoding</span>
+        </div>
+
+        <div class="tool-card glass">
+          <div class="tool-icon" style="background:rgba(249,226,175,0.12);color:var(--color-convert)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"/><path d="m9 14 2 2 4-4"/></svg>
+          </div>
+          <div class="tool-name">YAML ↔ JSON</div>
+          <div class="tool-desc">Seamlessly convert between YAML and JSON formats</div>
+          <span class="tool-tag">Converter</span>
+        </div>
+
+        <div class="tool-card glass">
+          <div class="tool-icon" style="background:rgba(148,226,213,0.12);color:var(--color-text)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.375 2.625a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4Z"/></svg>
+          </div>
+          <div class="tool-name">Markdown Preview</div>
+          <div class="tool-desc">Live rendering with GFM support, tables, and code blocks</div>
+          <span class="tool-tag">Text</span>
+        </div>
+
+        <div class="tool-card glass">
+          <div class="tool-icon" style="background:rgba(137,220,235,0.12);color:var(--color-generate)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 7h.01"/><path d="M17 7h.01"/><path d="M7 17h.01"/><path d="M17 17h.01"/><rect x="7" y="7" width="10" height="10" rx="1"/></svg>
+          </div>
+          <div class="tool-name">QR Code Generator</div>
+          <div class="tool-desc">Generate QR codes from text, URLs, and custom data</div>
+          <span class="tool-tag">Generator</span>
+        </div>
+
+        <div class="tools-more">
+          <div class="tools-count glass" style="border-radius:980px">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+            Plus 24 more tools — SQL Formatter, Diff Checker, Bcrypt, CSV ↔ JSON, Password Generator, and more
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ FEATURES ═══════════════ -->
+  <section class="section" id="features">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-label">Why DevToolbox</span>
+        <h2 class="section-title">Built different.</h2>
+        <p class="section-desc">No accounts. No telemetry. No cloud. Just tools that work, instantly.</p>
+      </div>
+
+      <div class="features-grid stagger" id="features-grid">
+        <div class="feature-card glass">
+          <div class="feature-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h.01"/><path d="M7 20v-4"/><path d="M12 20v-8"/><path d="M17 20V8"/><path d="M22 4v16"/></svg>
+          </div>
+          <div class="feature-name">Works Offline</div>
+          <div class="feature-desc">Every tool runs locally with zero network dependency. No internet? No problem.</div>
+        </div>
+
+        <div class="feature-card glass">
+          <div class="feature-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <div class="feature-name">Privacy-First</div>
+          <div class="feature-desc">Your data never leaves your machine. No analytics, no tracking, no accounts.</div>
+        </div>
+
+        <div class="feature-card glass">
+          <div class="feature-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
+          <div class="feature-name">Blazing Fast</div>
+          <div class="feature-desc">Rust-powered backend with native performance. Tools respond in milliseconds.</div>
+        </div>
+
+        <div class="feature-card glass">
+          <div class="feature-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          </div>
+          <div class="feature-name">Free Forever</div>
+          <div class="feature-desc">No premium tiers, no feature gates, no subscriptions. Every tool is free.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ PIPELINE SECTION ═══════════════ -->
+  <section class="section pipeline-section" id="pipeline">
+    <div class="container">
+      <div class="pipeline-showcase reveal">
+        <div class="pipeline-visual glass">
+          <div class="pipeline-nodes">
+            <div class="pipeline-node">
+              <div class="pipeline-node-icon" style="background:rgba(166,227,161,0.12);color:var(--color-encode)">B6</div>
+              <div>
+                <div style="font-weight:600;font-size:14px">Base64 Decode</div>
+                <div style="font-size:12px;color:var(--text-tertiary);margin-top:2px">Decode incoming payload</div>
+              </div>
+              <span class="pipeline-node-arrow">→</span>
+            </div>
+            <div class="pipeline-node">
+              <div class="pipeline-node-icon" style="background:rgba(250,179,135,0.12);color:var(--color-format)">{ }</div>
+              <div>
+                <div style="font-weight:600;font-size:14px">JSON Format</div>
+                <div style="font-size:12px;color:var(--text-tertiary);margin-top:2px">Pretty-print the structure</div>
+              </div>
+              <span class="pipeline-node-arrow">→</span>
+            </div>
+            <div class="pipeline-node">
+              <div class="pipeline-node-icon" style="background:rgba(243,139,168,0.12);color:var(--color-crypto)">#</div>
+              <div>
+                <div style="font-weight:600;font-size:14px">Hash (SHA-256)</div>
+                <div style="font-size:12px;color:var(--text-tertiary);margin-top:2px">Generate integrity hash</div>
+              </div>
+              <span class="pipeline-node-arrow">→</span>
+            </div>
+            <div class="pipeline-node">
+              <div class="pipeline-node-icon" style="background:rgba(203,166,247,0.12);color:var(--color-misc)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg>
+              </div>
+              <div>
+                <div style="font-weight:600;font-size:14px">Copy to Clipboard</div>
+                <div style="font-size:12px;color:var(--text-tertiary);margin-top:2px">Output ready to paste</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="pipeline-content">
+          <span class="section-label">Pipeline Builder</span>
+          <h3>Chain tools into<br>custom workflows.</h3>
+          <p>Connect any combination of tools into reusable pipelines. Decode, transform, validate, and hash — all in a single flow with the visual node editor.</p>
+          <div class="pipeline-features">
+            <div class="pipeline-feature">
+              <span class="pipeline-feature-dot"></span>
+              Drag-and-drop visual node editor
+            </div>
+            <div class="pipeline-feature">
+              <span class="pipeline-feature-dot"></span>
+              Chain any tools in any order
+            </div>
+            <div class="pipeline-feature">
+              <span class="pipeline-feature-dot"></span>
+              Save and reuse your workflows
+            </div>
+            <div class="pipeline-feature">
+              <span class="pipeline-feature-dot"></span>
+              Smart auto-detection of data formats
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ CTA SECTION ═══════════════ -->
+  <section class="cta-section" id="download">
+    <div class="container">
+      <div class="cta-card reveal">
+        <h2 class="cta-title">Ready to streamline<br>your workflow?</h2>
+        <p class="cta-desc">Download DevToolbox and get 36+ essential developer tools, all running natively on your machine.</p>
+        <div class="cta-actions">
+          <a href="#" class="btn-primary">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            Download for macOS
+          </a>
+          <a href="#" class="btn-secondary">
+            Windows &amp; Linux
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ FOOTER ═══════════════ -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-inner">
+        <div class="footer-left">
+          <a href="#" class="footer-brand">
+            <div class="footer-logo">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="16 18 22 12 16 6"></polyline>
+                <polyline points="8 6 2 12 8 18"></polyline>
+              </svg>
+            </div>
+            DevToolbox
+          </a>
+          <span class="footer-copy">&copy; 2025 DevToolbox. All rights reserved.</span>
+        </div>
+        <ul class="footer-links">
+          <li><a href="https://github.com" target="_blank" rel="noopener">GitHub</a></li>
+          <li><a href="#">Changelog</a></li>
+          <li><a href="#">Docs</a></li>
+          <li><a href="#">Privacy</a></li>
+        </ul>
+      </div>
+    </div>
+  </footer>
+
+</div>
+
+<!-- ═══════════════ JAVASCRIPT ═══════════════ -->
+<script>
+// Scroll-based nav background
+const nav = document.getElementById('nav');
+let lastScroll = 0;
+
+window.addEventListener('scroll', () => {
+  const scrollY = window.scrollY;
+  if (scrollY > 40) {
+    nav.classList.add('scrolled');
+  } else {
+    nav.classList.remove('scrolled');
+  }
+  lastScroll = scrollY;
+}, { passive: true });
+
+// Intersection Observer for reveal animations
+const observerOptions = {
+  threshold: 0.1,
+  rootMargin: '0px 0px -60px 0px'
+};
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      observer.unobserve(entry.target);
+    }
+  });
+}, observerOptions);
+
+document.querySelectorAll('.reveal, .stagger').forEach(el => observer.observe(el));
+
+// Parallax effect on hero orb
+const heroOrb = document.querySelector('.hero-orb');
+if (heroOrb) {
+  window.addEventListener('mousemove', (e) => {
+    const x = (e.clientX / window.innerWidth - 0.5) * 30;
+    const y = (e.clientY / window.innerHeight - 0.5) * 30;
+    heroOrb.style.transform = `translate(${x}px, ${y}px)`;
+  }, { passive: true });
+}
+
+// Smooth scroll for anchor links
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  anchor.addEventListener('click', function(e) {
+    e.preventDefault();
+    const target = document.querySelector(this.getAttribute('href'));
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+});
+</script>
+</body>
+</html>

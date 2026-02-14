@@ -416,6 +416,33 @@ body {
 
 .hero-meta span { margin: 0 8px; opacity: 0.3; }
 
+.install-note {
+  margin-top: 16px;
+  max-width: 520px;
+  padding: 14px 20px;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.45s forwards;
+  opacity: 0;
+}
+
+.install-note strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.install-note code {
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  font-family: 'SF Mono', monospace;
+  font-size: 12px;
+}
+
 /* ═══════════════════════════════════════════
    APP PREVIEW / WINDOW MOCK
    ═══════════════════════════════════════════ */
@@ -996,6 +1023,10 @@ body {
     <p class="hero-meta">
       macOS, Windows &amp; Linux <span>·</span> Built with Tauri <span>·</span> v0.1.0
     </p>
+
+    <div class="install-note">
+      <strong>macOS note:</strong> Since the app isn't notarized yet, macOS may block it on first launch. Open <code>System Settings → Privacy &amp; Security</code> and click <strong>"Open Anyway"</strong> next to the DevToolbox message.
+    </div>
 
     <!-- App Screenshot -->
     <div class="app-preview">
